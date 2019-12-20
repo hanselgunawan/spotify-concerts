@@ -21,7 +21,7 @@ public class SplashActivity extends AppCompatActivity {
     private SharedPreferences.Editor editor;
     private SharedPreferences mSharedPreferences;
 
-    private RequestQueue queue; // Android Volley
+    private RequestQueue queue; // Android Volley for queueing network call
 
     private static final String CLIENT_ID = "a8c4958fe607433eb5fd605fb9f264cd";
     private static final String REDIRECT_URI = "com.hanseltritama.spotifyconcerts://callback";
@@ -62,7 +62,7 @@ public class SplashActivity extends AppCompatActivity {
                     editor.putString("token", response.getAccessToken());
                     Log.d("STARTING", "ACCESS TOKEN GRANTED");
                     editor.apply();
-                    waitForUserInfo();
+                    //waitForUserInfo();
                     break;
 
                 // Auth error flow
