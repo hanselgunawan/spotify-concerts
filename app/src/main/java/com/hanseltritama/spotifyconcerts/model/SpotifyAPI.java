@@ -9,7 +9,7 @@ import retrofit2.http.QueryMap;
 
 public interface SpotifyAPI {
 
-    @GET("me")
-    Call<List<User>> getUser(@QueryMap Map<String, String> parameters);
+    @GET("v1/me")
+    Call<User> getUserInfo(@QueryMap Map<String, String> parameters);
 
 }

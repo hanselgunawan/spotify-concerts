@@ -9,17 +9,32 @@ import android.view.Window;
 import com.android.volley.RequestQueue;
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.Volley;
+import com.hanseltritama.spotifyconcerts.model.SpotifyAPI;
+import com.hanseltritama.spotifyconcerts.model.User;
 import com.spotify.sdk.android.authentication.AuthenticationClient;
 import com.spotify.sdk.android.authentication.AuthenticationRequest;
 import com.spotify.sdk.android.authentication.AuthenticationResponse;
 
+import java.util.HashMap;
+import java.util.Map;
+
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
+import okhttp3.OkHttpClient;
+import okhttp3.logging.HttpLoggingInterceptor;
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
+import retrofit2.Retrofit;
+import retrofit2.converter.gson.GsonConverterFactory;
 
 public class SplashActivity extends AppCompatActivity {
 
     private SharedPreferences.Editor editor;
     private SharedPreferences mSharedPreferences;
+    private Retrofit retrofit;
+    private SpotifyAPI spotifyAPI;
+
 
     private RequestQueue queue; // Android Volley for queueing network call
 
@@ -42,6 +57,22 @@ public class SplashActivity extends AppCompatActivity {
 
         mSharedPreferences = this.getSharedPreferences("SPOTIFY", 0);
         queue = Volley.newRequestQueue(this);
+
+        HttpLoggingInterceptor loggingInterceptor = new HttpLoggingInterceptor();
+        loggingInterceptor.setLevel(HttpLoggingInterceptor.Level.BODY);
+
+        OkHttpClient okHttpClient = new OkHttpClient.Builder()
+                .addInterceptor(loggingInterceptor)
+                .build();
+
+        retrofit = new Retrofit.Builder()
+                .baseUrl("https://api.spotify.com/")
+                .addConverterFactory(GsonConverterFactory.create())
+                .client(okHttpClient)
+                .build();
+
+        spotifyAPI = retrofit.create(SpotifyAPI.class);
+
     }
 
     @Override
@@ -56,6 +87,7 @@ public class SplashActivity extends AppCompatActivity {
 
                 // Response was successful and contains auth token
                 case TOKEN:
+                    // Add key "token" to the sharedPreferences
                     editor = getSharedPreferences("SPOTIFY", 0).edit();
 
                     // store token to SharedPreferences or persistent storage
@@ -92,5 +124,38 @@ public class SplashActivity extends AppCompatActivity {
         // Spotify has their own Login Activity
         AuthenticationClient.openLoginActivity(this, REQUEST_CODE, request);
 
+    }
+
+    public void waitForUserInfo() {
+
+        Map<String, String> headers = new HashMap<>();
+        String token = mSharedPreferences.getString("token", "");
+        String auth = "Bearer " + token;
+        headers.put("Authorization", auth);
+
+        Call<User> call = spotifyAPI.getUserInfo(headers);
+
+        call.enqueue(new Callback<User>() {
+            @Override
+            public void onResponse(Call<User> call, Response<User> response) {
+                if(!response.isSuccessful()) { // if call is not successful
+                    Log.d("ERROR", "Code: " + response.code());
+                    return;
+                }
+
+                startMainActivity();
+            }
+
+            @Override
+            public void onFailure(Call<User> call, Throwable t) {
+                Log.d("ERROR: ", t.getMessage());
+            }
+        });
+
+    }
+
+    public void startMainActivity() {
+        Intent newintent = new Intent(SplashActivity.this, MainActivity.class);
+        startActivity(newintent);
     }
 }
