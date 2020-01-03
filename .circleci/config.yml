@@ -30,7 +30,9 @@ jobs:
           path: app/build/test-results
       # See https://circleci.com/docs/2.0/deployment-integrations/ for deploy examples
       # Generate apk
-      - run: ./gradlew assembleDebug
+      - run:
+          name: Generate APK
+          command: ./gradlew assembleDebug
       - run:
           name : App upload and Set app id in environment variable.
           command : |
