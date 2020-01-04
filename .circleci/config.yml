@@ -49,3 +49,5 @@ jobs:
               exit 1;
             fi
       - run: ./gradlew test
+      - run: git clone git@github.com:wearefair/fair-feature-tests.git
+      - run: bundle exec cucumber ./fair-feature-tests/features/2_Android/1_Happy_Path/Features/browserstack-testing.feature TEST_ENV=stage --name "Browserstack Test"
