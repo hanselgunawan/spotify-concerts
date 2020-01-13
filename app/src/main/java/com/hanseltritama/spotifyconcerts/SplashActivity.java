@@ -91,10 +91,10 @@ public class SplashActivity extends AppCompatActivity {
                     editor = getSharedPreferences("SPOTIFY", 0).edit();
 
                     // store token to SharedPreferences or persistent storage
-                    editor.putString("token", response.getAccessToken());
+                    editor.putString("token", response.getAccessToken()); // TODO: Encrypt it
                     Log.d("STARTING", "ACCESS TOKEN GRANTED");
                     editor.apply();
-                    //waitForUserInfo();
+                    waitForUserInfo();
                     break;
 
                 // Auth error flow
@@ -128,12 +128,10 @@ public class SplashActivity extends AppCompatActivity {
 
     public void waitForUserInfo() {
 
-        Map<String, String> headers = new HashMap<>();
         String token = mSharedPreferences.getString("token", "");
         String auth = "Bearer " + token;
-        headers.put("Authorization", auth);
 
-        Call<User> call = spotifyAPI.getUserInfo(headers);
+        Call<User> call = spotifyAPI.getUserInfo(auth);
 
         call.enqueue(new Callback<User>() {
             @Override
